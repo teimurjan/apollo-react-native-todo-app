@@ -1,22 +1,25 @@
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import initTodosQuery from './todos/query';
-import initTodosMutation from './todos/mutations';
+import { makeCreateTodoMutation, makeDeleteTodoMutation } from './todos/mutations';
 
-const initQueries = repos => ({
-  todos: initTodosQuery(repos.todoRepo),
+const initQueries = services => ({
+  todos: initTodosQuery(services.readTodosService),
 });
 
-const initMutations = repos => initTodosMutation(repos.todoRepo);
+const initMutations = services => ({
+  createTodo: makeCreateTodoMutation(services.createTodoService),
+  deleteTodo: makeDeleteTodoMutation(services.deleteTodoService),
+});
 
-export default (repos) => {
+export default (services) => {
   const query = new GraphQLObjectType({
     name: 'Query',
-    fields: initQueries(repos),
+    fields: initQueries(services),
   });
 
   const mutation = new GraphQLObjectType({
     name: 'Mutation',
-    fields: initMutations(repos),
+    fields: initMutations(services),
   });
 
   return new GraphQLSchema({
